@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">PC Configurator | Flagship Build Engine</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+
+    <style type="text/tailwindcss">
+        /* ------------------------------------------------------------------
+           Tailwind v4 (browser build) defaults dark: to a media query.
+           This app toggles a literal `.dark` class on <html>, so we re-point
+           the `dark:` variant at that class.
+        ------------------------------------------------------------------ */
+        @custom-variant dark (&:where(.dark, .dark *));
+
+        /* ===========================================================
+           CSS CUSTOM PROPERTIES – LIGHT MODE (default)
+        =========================================================== */
+        :root {
+            --bg-primary: #f4f6f8;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #ffffff;
+            --bg-elevated: #ffffff;
+            --border-color: #e2e8f0;
+            --border-color-light: #cbd5e1;
+            --text-primary: #1a1a1a;
+            --text-secondary: #475569;
+            --text-muted: #64748b;
+            --accent: #7b2ff7;
+            --accent-light: #a78bfa;
+            --accent-dark: #6d28d9;
+            --accent-glow: rgba(123, 47, 247, 0.4);
+            --accent-shadow: 0 0 15px rgba(123, 47, 247, 0.4);
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            --card-hover-shadow: 0 10px 30px -10px rgba(123, 47, 247, 0.15);
+            --button-primary-bg: #1e1e2f;
+            --button-primary-text: #ffffff;
+            --button-disabled-bg: #e2e8f0;
+            --button-disabled-text: #94a3b8;
+            --scrollbar-track: #e2e8f0;
+            --scrollbar-thumb: #94a3b8;
+            --scrollbar-thumb-hover: #7b2ff7;
+            --neon-text-shadow: 0 0 8px rgba(123, 47, 247, 0.4);
+            --transition-speed: 0.3s;
+        }
+
+        /* ===========================================================
+           DARK MODE OVERRIDES
+        =========================================================== */
+        .dark {
+            --bg-primary: #09090b;
+            --bg-secondary: #18181b;
+            --bg-tertiary: #18181b;
+            --bg-elevated: #1f1f23;
+            --border-color: #27272a;
+            --border-color-light: #3f3f46;
+            --text-primary: #f4f4f5;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --accent: #d946ef;
+            --accent-light: #f0abfc;
+            --accent-dark: #c026d3;
+            --accent-glow: rgba(217, 70, 239, 0.4);
+            --accent-shadow: 0 0 15px rgba(217, 70, 239, 0.4);
+            --card-shadow: 0 4px 6px -1px rgba(0,0,0,0.3), 0 2px 4px -2px rgba(0,0,0,0.3);
+            --card-hover-shadow: 0 10px 30px -10px rgba(168, 85, 247, 0.15);
+            --button-primary-bg: #ffffff;
+            --button-primary-text: #09090b;
+            --button-disabled-bg: #27272a;
+            --button-disabled-text: #52525b;
+            --scrollbar-track: #18181b;
+            --scrollbar-thumb: #3f3f46;
+            --scrollbar-thumb-hover: #d946ef;
+            --neon-text-shadow: 0 0 8px rgba(217, 70, 239, 0.6);
+        }
+
+        /* ===========================================================
+           GLOBAL STYLES
+        =========================================================== */
+        body {
+            font-family: 'Rajdhani', sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: background-color var(--transition-speed) ease, color var(--transition-speed) ease;
+        }
+
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* Smooth transition for containers */
+        .glass-panel,
+        .hardware-card,
+        footer,
+        header,
+        .control-select,
+        button {
+            transition: background-color var(--transition-speed) ease,
+                        color var(--transition-speed) ease,
+                        border-color var(--transition-speed) ease,
+                        box-shadow var(--transition-speed) ease;
+        }
+
+        .glass-panel {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            background-color: var(--bg-tertiary);
+            border-color: var(--border-color);
+        }
+
+        .hardware-card {
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--card-shadow);
+        }
+
+        .hardware-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            border: 2px solid transparent;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* Card hover / selected states (common) */
+        .hardware-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--card-hover-shadow);
+        }
+        .hardware-card.selected {
+            background-color: var(--bg-elevated);
+        }
+        .hardware-card.selected::before {
+            border-color: var(--accent);
+            box-shadow: var(--accent-shadow), inset 0 0 10px var(--accent-glow);
+        }
+
+        .neon-text {
+            text-shadow: var(--neon-text-shadow);
+        }
+
+        .matrix-loader {
+            display: none;
+            background: radial-gradient(circle, rgba(24,24,27,0.95) 0%, rgba(9,9,11,1) 100%);
+        }
+        .matrix-loader.active { display: flex; }
+
+        .scanline {
+            width: 100%;
+            height: 4px;
+            background: var(--accent);
+            box-shadow: 0 0 20px var(--accent), 0 0 40px var(--accent-light);
+            position: absolute;
+            top: 0;
+            animation: scan 2s linear infinite;
+        }
+
+        @keyframes scan {
+            0% { top: -10%; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 110%; opacity: 0; }
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--scrollbar-track); }
+        ::-webkit-scrollbar-thumb { background: var(--scrollbar-thumb); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--scrollbar-thumb-hover); }
+
+        /* Price animation */
+        .price-update { animation: flashPrice 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+        @keyframes flashPrice {
+            0% { opacity: 0.5; transform: scale(0.98); }
+            50% { opacity: 1; transform: scale(1.02); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        .control-select {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .copy-flash { animation: copyFlash 0.5s ease; }
+        @keyframes copyFlash {
+            0% { transform: scale(0.95); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col relative overflow-x-hidden">
+
+    <!-- Header -->
+    <header class="fixed top-0 w-full z-50 glass-panel border-b h-20">
+        <div class="container mx-auto px-4 sm:px-6 h-full flex justify-between items-center gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+                <div class="w-10 h-10 shrink-0 bg-gradient-to-br from-violet-600 to-purple-600 rounded-sm flex items-center justify-center transform rotate-45 shadow-[0_0_15px_var(--accent-glow)]">
+                    <span class="font-orbitron font-bold text-white transform -rotate-45 text-xl">P</span>
+                </div>
+                <h1 class="font-orbitron font-bold text-lg sm:text-2xl tracking-widest uppercase truncate">
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-500">PC</span>
+                    <span class="text-[var(--text-primary)]"> Configurator</span>
+                </h1>
+            </div>
+
+            <div class="flex items-center gap-2 sm:gap-4 shrink-0">
+                <select id="languageSelector" aria-label="Language" class="control-select text-sm rounded-sm px-2 sm:px-3 py-1.5 focus:outline-none focus:border-[var(--accent)] transition-colors cursor-pointer font-semibold tracking-wide">
+                    <option value="en">EN — English</option>
+                    <option value="ru">RU — Русский</option>
+                    <option value="ky">KY — Кыргызча</option>
+                    <option value="be">BE — Беларуская</option>
+                    <option value="kk">KK — Қазақша</option>
+                    <option value="uz">UZ — O'zbekcha</option>
+                </select>
+
+                <select id="currencySelector" aria-label="Currency" class="control-select text-sm rounded-sm px-2 sm:px-3 py-1.5 focus:outline-none focus:border-[var(--accent)] transition-colors cursor-pointer font-semibold tracking-wide">
+                    <option value="USD">USD ($)</option>
+                    <option value="RUB">RUB (₽)</option>
+                    <option value="BYN">BYN (Br)</option>
+                    <option value="KGS">KGS (сом)</option>
+                    <option value="UZS">UZS (сум)</option>
+                    <option value="KZT">KZT (₸)</option>
+                </select>
+
+                <button id="themeToggle" aria-label="Toggle theme" class="p-2 rounded-full hover:bg-[var(--border-color)] transition-colors shrink-0">
+                    <svg id="moonIcon" class="w-6 h-6 hidden dark:block text-fuchsia-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                    <svg id="sunIcon" class="w-6 h-6 block dark:hidden text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main content -->
+    <main class="flex-grow container mx-auto px-4 sm:px-6 pt-32 pb-32">
+        <div class="mb-12">
+            <div class="flex justify-between items-center mb-4 relative">
+                <div class="absolute left-0 top-1/2 w-full h-0.5 bg-[var(--border-color)] -z-10 transform -translate-y-1/2"></div>
+                <div id="progressLine" class="absolute left-0 top-1/2 h-0.5 bg-gradient-to-r from-violet-600 to-fuchsia-500 -z-10 transform -translate-y-1/2 transition-all duration-700 ease-out" style="width: 0%;"></div>
+                <div id="stepIndicators" class="flex justify-between w-full"></div>
+            </div>
+            <h2 id="stepTitle" class="text-3xl sm:text-4xl font-orbitron font-bold uppercase tracking-wide text-[var(--text-primary)] mt-8 mb-2 drop-shadow-md">Step Title</h2>
+            <p id="stepDescription" class="text-[var(--text-secondary)] text-lg">Step Description goes here.</p>
+        </div>
+
+        <div id="hardwareGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"></div>
+
+        <div id="checkoutSection" class="hidden">
+            <div class="bg-[var(--bg-secondary)] border border-[var(--border-color)] p-6 sm:p-8 rounded-sm shadow-2xl relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-[var(--accent)]/10 rounded-full blur-3xl pointer-events-none"></div>
+                <h3 id="manifestTitle" class="text-2xl font-orbitron font-bold mb-6 border-b border-[var(--border-color)] pb-4 text-[var(--text-primary)]">System Manifest</h3>
+                <div id="invoiceList" class="space-y-4 mb-8"></div>
+                <div class="bg-[var(--bg-primary)] p-6 rounded-sm border border-[var(--border-color)] flex flex-wrap gap-4 justify-between items-center mb-8">
+                    <div>
+                        <p id="powerLabel" class="text-[var(--text-muted)] font-bold text-sm uppercase tracking-wider mb-1">Estimated Draw / Selected PSU</p>
+                        <p id="powerSummary" class="font-orbitron text-xl font-bold text-[var(--accent)]">0W / 0W</p>
+                    </div>
+                    <div class="text-right">
+                        <p id="totalLabel" class="text-[var(--text-muted)] font-bold text-sm uppercase tracking-wider mb-1">Estimated Build Total</p>
+                        <p id="checkoutTotal" class="font-orbitron text-3xl sm:text-4xl font-bold text-[var(--text-primary)] neon-text">0</p>
+                    </div>
+                </div>
+                <div class="max-w-xl">
+                    <div class="bg-[var(--bg-primary)] border border-[var(--accent)]/40 rounded-sm p-6 mb-6 relative overflow-hidden">
+                        <div class="absolute -top-10 -right-10 w-40 h-40 bg-[var(--accent)]/10 rounded-full blur-3xl pointer-events-none"></div>
+                        <h4 id="contactTitle" class="font-orbitron font-bold text-lg mb-2 text-[var(--accent)]">Need Professional Assembly?</h4>
+                        <p id="contactText" class="text-[var(--text-secondary)] mb-4">For professional assembly help, contact our lead engineer:</p>
+                        <div class="flex items-center gap-3 flex-wrap">
+                            <div class="flex items-center gap-2 bg-[var(--bg-secondary)] border border-[var(--border-color)] rounded-sm px-4 py-2">
+                                <span class="font-orbitron font-bold text-[var(--accent)]">@minecaine</span>
+                                <span id="contactSuffix" class="text-[var(--text-muted)] text-sm">on Telegram</span>
+                            </div>
+                            <button id="copyHandleBtn" class="px-4 py-2 bg-[var(--border-color)] hover:bg-[var(--border-color-light)] text-[var(--text-primary)] rounded-sm text-sm font-bold uppercase tracking-wider transition-colors">Copy</button>
+                        </div>
+                    </div>
+                    <button id="sendTelegramBtn" class="w-full py-4 bg-gradient-to-r from-violet-600 to-purple-600 hover:from-violet-500 hover:to-purple-500 text-white font-orbitron font-bold text-xl tracking-wider rounded-sm transform transition hover:-translate-y-1 hover:shadow-[0_0_20px_var(--accent-glow)]">
+                        Send Manifest via Telegram
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="fixed bottom-0 w-full z-40 glass-panel border-t shadow-[0_-10px_30px_var(--bg-primary)]">
+        <div class="container mx-auto px-4 sm:px-6 h-24 flex justify-between items-center">
+            <div class="flex items-center gap-6">
+                <div class="hidden md:block">
+                    <p id="buildCostLabel" class="text-xs text-[var(--text-muted)] font-bold uppercase tracking-widest mb-1">Est. Build Cost</p>
+                    <div id="footerTotal" class="text-2xl sm:text-3xl font-orbitron font-bold text-[var(--text-primary)] transition-all">0</div>
+                </div>
+            </div>
+            <div class="flex gap-3 sm:gap-4">
+                <button id="btnPrev" class="px-5 sm:px-8 py-3 bg-[var(--bg-secondary)] border border-[var(--border-color)] text-[var(--text-primary)] font-bold uppercase tracking-wider rounded-sm hover:bg-[var(--border-color)] transition-colors disabled:opacity-30 disabled:cursor-not-allowed">
+                    Back
+                </button>
+                <button id="btnNext" class="px-5 sm:px-8 py-3 bg-[var(--button-primary-bg)] text-[var(--button-primary-text)] font-bold uppercase tracking-wider rounded-sm hover:opacity-90 transition-all transform hover:scale-105 disabled:opacity-30 disabled:cursor-not-allowed disabled:transform-none">
+                    Next
+                </button>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Loading overlay -->
+    <div id="loadingOverlay" class="matrix-loader fixed inset-0 z-[100] flex-col items-center justify-center px-6">
+        <div class="scanline"></div>
+        <div id="loadingSpinner" class="w-16 h-16 border-4 border-zinc-800 border-t-[var(--accent)] rounded-full animate-spin mb-8"></div>
+        <h2 class="font-orbitron text-2xl sm:text-4xl text-transparent bg-clip-text bg-gradient-to-r from-violet-400 to-fuchsia-500 font-bold tracking-widest animate-pulse text-center" id="loadingText"></h2>
+        <div class="mt-4 font-mono text-fuchsia-600/60 text-sm max-w-lg text-center" id="matrixLogs"></div>
+    </div>
+
+    <script>
+        // --- DATA ARCHITECTURE (unchanged hardware catalog) ---
+        const db = {
+            cpu: [
+                { id: 'c1', name: 'Ryzen 3 4100', price: 69, tdp: 65, socket: 'AM4', brand: 'AMD' },
+                { id: 'c2', name: 'Ryzen 7 5700X', price: 209, tdp: 65, socket: 'AM4', brand: 'AMD' },
+                { id: 'c3', name: 'Core i3-12100F', price: 89, tdp: 60, socket: 'LGA1700', brand: 'Intel' },
+                { id: 'c4', name: 'Core i3-13100F', price: 109, tdp: 60, socket: 'LGA1700', brand: 'Intel' },
+                { id: 'c5', name: 'Core i5-12400F', price: 119, tdp: 65, socket: 'LGA1700', brand: 'Intel' },
+                { id: 'c6', name: 'Core i5-12400', price: 149, tdp: 65, socket: 'LGA1700', brand: 'Intel' },
+                { id: 'c7', name: 'Core i5-13400F', price: 149, tdp: 65, socket: 'LGA1700', brand: 'Intel' },
+                { id: 'c8', name: 'Core i5-13600K', price: 239, tdp: 125, socket: 'LGA1700', brand: 'Intel' },
+                { id: 'c9', name: 'Core Ultra 5 245KF', price: 299, tdp: 125, socket: 'LGA1851', brand: 'Intel' },
+                { id: 'c10', name: 'Core Ultra 5 250K Plus', price: 199, tdp: 125, socket: 'LGA1851', brand: 'Intel' },
+                { id: 'c11', name: 'Core Ultra 7 265KF', price: 349, tdp: 125, socket: 'LGA1851', brand: 'Intel' },
+                { id: 'c12', name: 'Core Ultra 7 265K', price: 369, tdp: 125, socket: 'LGA1851', brand: 'Intel' },
+                { id: 'c13', name: 'Core Ultra 7 270K Plus', price: 299, tdp: 125, socket: 'LGA1851', brand: 'Intel' },
+                { id: 'c14', name: 'Core Ultra 9 285K', price: 569, tdp: 125, socket: 'LGA1851', brand: 'Intel' },
+                { id: 'c15', name: 'Ryzen 5 7600', price: 199, tdp: 65, socket: 'AM5', brand: 'AMD' },
+                { id: 'c16', name: 'Ryzen 5 7600X', price: 209, tdp: 105, socket: 'AM5', brand: 'AMD' },
+                { id: 'c17', name: 'Ryzen 5 9600X', price: 269, tdp: 65, socket: 'AM5', brand: 'AMD' },
+                { id: 'c18', name: 'Ryzen 7 9700X', price: 329, tdp: 65, socket: 'AM5', brand: 'AMD' },
+                { id: 'c19', name: 'Ryzen 7 9800X3D', price: 409, tdp: 120, socket: 'AM5', brand: 'AMD' },
+                { id: 'c20', name: 'Ryzen 9 9900X', price: 449, tdp: 120, socket: 'AM5', brand: 'AMD' },
+                { id: 'c21', name: 'Ryzen 9 9950X', price: 619, tdp: 170, socket: 'AM5', brand: 'AMD' }
+            ],
+            mobo: [
+                { id: 'm1', name: 'Gigabyte A520 AORUS ELITE', price: 99, socket: 'AM4', ram: 'DDR4' },
+                { id: 'm2', name: 'Asus Prime A520M-R', price: 87, socket: 'AM4', ram: 'DDR4' },
+                { id: 'm3', name: 'Gigabyte H610M H V3 DDR4', price: 79, socket: 'LGA1700', ram: 'DDR4' },
+                { id: 'm4', name: 'ASRock H610M-HDV/M.2+ D5', price: 99, socket: 'LGA1700', ram: 'DDR5' },
+                { id: 'm5', name: 'MSI Pro B760M-E', price: 100, socket: 'LGA1700', ram: 'DDR5' },
+                { id: 'm6', name: 'ASUS PRIME B760M-K D4', price: 109, socket: 'LGA1700', ram: 'DDR4' },
+                { id: 'm7', name: 'ASRock B760 PRO RS', price: 129, socket: 'LGA1700', ram: 'DDR5' },
+                { id: 'm8', name: 'Gigabyte B760 GAMING X', price: 197, socket: 'LGA1700', ram: 'DDR5' },
+                { id: 'm9', name: 'MSI MAG B760M MORTAR WIFI', price: 179, socket: 'LGA1700', ram: 'DDR5' },
+                { id: 'm10', name: 'ASUS TUF GAMING B760M-PLUS II', price: 237, socket: 'LGA1700', ram: 'DDR5' },
+                { id: 'm11', name: 'MSI PRO Z790-S WIFI', price: 239, socket: 'LGA1700', ram: 'DDR5' },
+                { id: 'm12', name: 'MSI MAG Z790 TOMAHAWK WIFI', price: 237, socket: 'LGA1700', ram: 'DDR5' },
+                { id: 'm13', name: 'Gigabyte Z790 AORUS ELITE AX', price: 279, socket: 'LGA1700', ram: 'DDR5' },
+                { id: 'm14', name: 'ASUS TUF GAMING Z790-PRO WIFI', price: 310, socket: 'LGA1700', ram: 'DDR5' },
+                { id: 'm15', name: 'Gigabyte Z790 AORUS MASTER X', price: 519, socket: 'LGA1700', ram: 'DDR5' },
+                { id: 'm16', name: 'ASUS ROG STRIX Z790-E GAMING WIFI', price: 490, socket: 'LGA1700', ram: 'DDR5' },
+                { id: 'm17', name: 'MSI PRO B650M-B', price: 99, socket: 'AM5', ram: 'DDR5' },
+                { id: 'm18', name: 'ASRock B650M HDV/M.2', price: 129, socket: 'AM5', ram: 'DDR5' },
+                { id: 'm19', name: 'Biostar B650MT', price: 115, socket: 'AM5', ram: 'DDR5' },
+                { id: 'm20', name: 'GIGABYTE B650M D3HP', price: 140, socket: 'AM5', ram: 'DDR5' },
+                { id: 'm21', name: 'GIGABYTE B650 EAGLE', price: 159, socket: 'AM5', ram: 'DDR5' },
+                { id: 'm22', name: 'ASUS PRIME B650M-A II', price: 166, socket: 'AM5', ram: 'DDR5' },
+                { id: 'm23', name: 'GIGABYTE B650 AORUS ELITE AX', price: 179, socket: 'AM5', ram: 'DDR5' },
+                { id: 'm24', name: 'MSI B650M GAMING PLUS WIFI', price: 175, socket: 'AM5', ram: 'DDR5' },
+                { id: 'm25', name: 'ASRock B650 PG LIGHTNING', price: 120, socket: 'AM5', ram: 'DDR5' },
+                { id: 'm26', name: 'ASUS TUF GAMING B650-PLUS WIFI', price: 199, socket: 'AM5', ram: 'DDR5' },
+                { id: 'm27', name: 'GIGABYTE B650I AORUS ULTRA', price: 259, socket: 'AM5', ram: 'DDR5' },
+                { id: 'm28', name: 'MSI B850 GAMING PLUS WIFI6E', price: 230, socket: 'AM5', ram: 'DDR5' },
+                { id: 'm29', name: 'ASUS ROG STRIX X670E-E GAMING WIFI', price: 549, socket: 'AM5', ram: 'DDR5' },
+                { id: 'm30', name: 'GIGABYTE X670 AORUS MASTER', price: 480, socket: 'AM5', ram: 'DDR5' },
+                { id: 'm31', name: 'MSI H810M GAMING WIFI6E', price: 209, socket: 'LGA1851', ram: 'DDR5' },
+                { id: 'm32', name: 'ASRock Z890I LIGHTNING WIFI', price: 350, socket: 'LGA1851', ram: 'DDR5' }
+            ],
+            ram: [
+                { id: 'r1', name: 'Kingston Fury Beast 8GB 3200MHz', price: 15, ram: 'DDR4' },
+                { id: 'r2', name: 'Kingston Fury Beast 16GB 3200MHz', price: 29, ram: 'DDR4' },
+                { id: 'r3', name: 'Kingston Fury Beast 32GB 3200MHz', price: 55, ram: 'DDR4' },
+                { id: 'r4', name: 'G.Skill Aegis 16GB 3600MHz', price: 30, ram: 'DDR4' },
+                { id: 'r5', name: 'G.Skill Trident Z4 32GB 3600MHz', price: 60, ram: 'DDR4' },
+                { id: 'r6', name: 'Crucial 16GB 4800MHz', price: 32, ram: 'DDR5' },
+                { id: 'r7', name: 'Crucial 32GB 4800MHz', price: 110, ram: 'DDR5' },
+                { id: 'r8', name: 'Patriot Viper Venom 16GB 5200MHz', price: 35, ram: 'DDR5' },
+                { id: 'r9', name: 'Patriot Viper Venom 32GB 5200MHz', price: 105, ram: 'DDR5' },
+                { id: 'r10', name: 'Patriot Viper Venom 16GB 6000MHz', price: 45, ram: 'DDR5' },
+                { id: 'r11', name: 'Patriot Viper Venom 32GB 6000MHz', price: 85, ram: 'DDR5' },
+                { id: 'r12', name: 'Kingston Fury Renegade 16GB 6000MHz', price: 55, ram: 'DDR5' },
+                { id: 'r13', name: 'Kingston Fury Renegade 32GB 6000MHz', price: 120, ram: 'DDR5' },
+                { id: 'r14', name: 'Kingston Fury 64GB 6000MHz', price: 240, ram: 'DDR5' },
+                { id: 'r15', name: 'G.Skill Trident Z5 Neo 32GB 6000MHz', price: 95, ram: 'DDR5' }
+            ],
+            gpu: [
+                { id: 'g1', name: 'Intel Arc B570', price: 299, tdp: 150 },
+                { id: 'g2', name: 'Nvidia GeForce RTX 5060', price: 309, tdp: 140 },
+                { id: 'g3', name: 'AMD Radeon RX 7600', price: 249, tdp: 165 },
+                { id: 'g4', name: 'AMD Radeon RX 9060 XT 8GB', price: 299, tdp: 160 },
+                { id: 'g5', name: 'AMD Radeon RX 9060 XT 16GB', price: 349, tdp: 175 },
+                { id: 'g6', name: 'Nvidia GeForce RTX 5060 Ti 16GB', price: 399, tdp: 180 },
+                { id: 'g7', name: 'Nvidia GeForce RTX 5070', price: 549, tdp: 220 },
+                { id: 'g8', name: 'Nvidia GeForce RTX 5070 Ti 16GB', price: 699, tdp: 250 },
+                { id: 'g9', name: 'AMD Radeon RX 9070 XT', price: 549, tdp: 230 },
+                { id: 'g10', name: 'AMD Radeon RX 7700 XT', price: 399, tdp: 245 },
+                { id: 'g11', name: 'AMD Radeon RX 7800 XT', price: 499, tdp: 263 },
+                { id: 'g12', name: 'AMD Radeon RX 7900 XT', price: 749, tdp: 315 },
+                { id: 'g13', name: 'AMD Radeon RX 7900 XTX', price: 899, tdp: 355 },
+                { id: 'g14', name: 'Nvidia GeForce RTX 5080 16GB', price: 999, tdp: 400 },
+                { id: 'g15', name: 'Nvidia GeForce RTX 5090 32GB', price: 1999, tdp: 600 }
+            ],
+            ssd: [
+                { id: 's1', name: 'Patriot P210S 1TB (SATA)', price: 25 },
+                { id: 's2', name: 'ADATA ASU650SS 1TB (SATA)', price: 28 },
+                { id: 's3', name: 'Samsung 870 EVO 1TB (SATA)', price: 55 },
+                { id: 's4', name: 'Patriot P310 1TB (NVMe)', price: 35 },
+                { id: 's5', name: 'Samsung 990 EVO 1TB (NVMe)', price: 45 },
+                { id: 's6', name: 'WD SN770 1TB (NVMe)', price: 75 },
+                { id: 's7', name: 'WD SN770 2TB (NVMe)', price: 130 },
+                { id: 's8', name: 'Samsung 990 PRO 1TB (NVMe)', price: 95 },
+                { id: 's9', name: 'Samsung 990 PRO 2TB (NVMe)', price: 170 },
+                { id: 's10', name: 'Samsung T700 1TB (NVMe)', price: 130 },
+                { id: 's11', name: 'Samsung T700 2TB (NVMe)', price: 250 }
+            ],
+            psu: [
+                { id: 'p1', name: 'DeepCool PF400 400W', price: 35, capacity: 400 },
+                { id: 'p2', name: 'AeroCool KCAS-500 500W', price: 40, capacity: 500 },
+                { id: 'p3', name: 'Corsair CV650 650W', price: 55, capacity: 650 },
+                { id: 'p4', name: 'MSI MAG A650BN 650W', price: 59, capacity: 650 },
+                { id: 'p5', name: 'Corsair RM750e 750W', price: 89, capacity: 750 },
+                { id: 'p6', name: 'MSI MAG A750GL 750W', price: 95, capacity: 750 },
+                { id: 'p7', name: 'Corsair RM850e 850W', price: 109, capacity: 850 },
+                { id: 'p8', name: 'Corsair RM1000x 1000W', price: 139, capacity: 1000 },
+                { id: 'p9', name: 'Corsair RM1200x 1200W', price: 180, capacity: 1200 }
+            ],
+            cooling_case: [
+                { id: 'cc1', name: 'DeepCool MATREXX 40', price: 45, type: 'case' },
+                { id: 'cc2', name: 'Phanteks XT Pro Ultra', price: 49, type: 'case' },
+                { id: 'cc3', name: 'AeroCool A80', price: 55, type: 'case' },
+                { id: 'cc4', name: 'Zalman Z12', price: 120, type: 'case' },
+                { id: 'cc5', name: 'Corsair 4000D Airflow', price: 139, type: 'case' },
+                { id: 'cc6', name: 'Phanteks EX5', price: 109, type: 'case' },
+                { id: 'cc7', name: 'Phanteks EX5 PLUS w/ AIO', price: 159, type: 'case' },
+                { id: 'cc8', name: 'Phanteks EX5 MAX w/ 6" LCD', price: 229, type: 'case' },
+                { id: 'cc9', name: 'Phanteks EX6', price: 160, type: 'case' },
+                { id: 'cc10', name: 'Phanteks EX6 MAX w/ 10" LCD', price: 330, type: 'case' },
+                { id: 'cc11', name: 'DeepCool AK400 Air', price: 15, type: 'cooler' },
+                { id: 'cc12', name: 'AeroCool CPU Cooler', price: 18, type: 'cooler' },
+                { id: 'cc13', name: 'DeepCool AK620 Dual', price: 35, type: 'cooler' },
+                { id: 'cc14', name: 'Corsair H100i 240mm AIO', price: 90, type: 'cooler' },
+                { id: 'cc15', name: 'NZXT Kraken X63 280mm AIO', price: 120, type: 'cooler' },
+                { id: 'cc16', name: 'Corsair H150i 360mm AIO', price: 150, type: 'cooler' },
+                { id: 'cc17', name: 'DeepCool CF120 ARGB', price: 8, type: 'fan' },
+                { id: 'cc18', name: 'AeroCool F120 ARGB', price: 10, type: 'fan' },
+                { id: 'cc19', name: 'Phanteks T30-140 ARGB', price: 15, type: 'fan' },
+                { id: 'cc20', name: 'Corsair QL120 ARGB', price: 25, type: 'fan' },
+                { id: 'cc21', name: 'Corsair QL140 ARGB', price: 30, type: 'fan' }
+            ]
+        };
+
+        // --- LANGUAGE DICTIONARY (unchanged) ---
+        const i18n = {
+            en: {
+                steps: [
+                    { title: 'Central Processing Unit', desc: 'Select the core computational engine.' },
+                    { title: 'Motherboard', desc: 'Mainboard restricted by CPU socket compatibility.' },
+                    { title: 'Operating Memory', desc: 'High-speed volatile storage locked to motherboard generation.' },
+                    { title: 'Graphics Processing Unit', desc: 'Visual processing and AI rendering engine.' },
+                    { title: 'Primary Storage', desc: 'High-velocity NVMe or SATA SSD drives.' },
+                    { title: 'Power Supply Unit', desc: 'Intelligent wattage limits based on selected hardware draw.' },
+                    { title: 'Chassis & Thermal Control', desc: 'Select case, CPU cooler, and extra fans.' },
+                    { title: 'Manifest Checkout', desc: 'Review your configuration before reaching out.' }
+                ],
+                sections: { case: 'Chassis', cooler: 'Thermal Solution', fan: 'Case Fans' },
+                ui: {
+                    estPrice: 'Est. Price', needsPower: 'Needs {n}W', back: 'Back', next: 'Next',
+                    buildCost: 'Est. Build Cost', manifestTitle: 'System Manifest',
+                    powerLabel: 'Estimated Draw / Selected PSU', totalLabel: 'Estimated Build Total',
+                    contactTitle: 'Need Professional Assembly?',
+                    contactText: 'For professional assembly help, contact our lead engineer:',
+                    contactSuffix: 'on Telegram', copy: 'Copy', copied: 'Copied!',
+                    send: 'Send Manifest via Telegram',
+                    transmit1: 'Encrypting manifest...', transmit2: 'Opening Telegram...',
+                    watt: 'W', draw: 'Draw', peak: 'Peak'
+                }
+            },
+            ru: {
+                steps: [
+                    { title: 'Центральный процессор', desc: 'Выберите ядро вычислительной мощности системы.' },
+                    { title: 'Материнская плата', desc: 'Совместимость платы ограничена сокетом процессора.' },
+                    { title: 'Оперативная память', desc: 'Высокоскоростная память, тип зависит от поколения платы.' },
+                    { title: 'Видеокарта', desc: 'Графический процессор для рендеринга и игр.' },
+                    { title: 'Накопитель', desc: 'Быстрые SSD-накопители NVMe или SATA.' },
+                    { title: 'Блок питания', desc: 'Мощность подбирается автоматически под вашу сборку.' },
+                    { title: 'Корпус и охлаждение', desc: 'Выберите корпус, кулер процессора и доп. вентиляторы.' },
+                    { title: 'Итоговая сборка', desc: 'Проверьте конфигурацию перед обращением к нам.' }
+                ],
+                sections: { case: 'Корпус', cooler: 'Охлаждение', fan: 'Вентиляторы' },
+                ui: {
+                    estPrice: 'Цена', needsPower: 'Нужно {n}Вт', back: 'Назад', next: 'Далее',
+                    buildCost: 'Стоимость сборки', manifestTitle: 'Состав сборки',
+                    powerLabel: 'Потребление / Блок питания', totalLabel: 'Итоговая стоимость',
+                    contactTitle: 'Нужна помощь со сборкой?',
+                    contactText: 'Для профессиональной сборки свяжитесь с нашим инженером:',
+                    contactSuffix: 'в Telegram', copy: 'Скопировать', copied: 'Скопировано!',
+                    send: 'Отправить сборку в Telegram',
+                    transmit1: 'Шифрование данных...', transmit2: 'Открываем Telegram...',
+                    watt: 'Вт', draw: 'потребление', peak: 'пиковая'
+                }
+            },
+            ky: {
+                steps: [
+                    { title: 'Борбордук процессор', desc: 'Системанын эсептөө өзөгүн тандаңыз.' },
+                    { title: 'Негизги плата', desc: 'Плата процессордун сокетине ылайык чектелет.' },
+                    { title: 'Оперативдик эс тутум', desc: 'Ылдам эс тутум, түрү негизги платага жараша болот.' },
+                    { title: 'Видео карта', desc: 'Рендеринг жана оюндар үчүн графикалык процессор.' },
+                    { title: 'Сактагыч', desc: 'Ылдам NVMe же SATA SSD дисктери.' },
+                    { title: 'Электр менен камсыздоо блогу', desc: 'Кубаттуулук тандалган түзүлүштөргө жараша автоматтык эсептелет.' },
+                    { title: 'Корпус жана муздатуу', desc: 'Корпус, процессор муздаткычын жана кошумча желдеткичтерди тандаңыз.' },
+                    { title: 'Жыйынтык тизме', desc: 'Биз менен байланышуудан мурун конфигурацияны текшериңиз.' }
+                ],
+                sections: { case: 'Корпус', cooler: 'Муздатуу системасы', fan: 'Желдеткичтер' },
+                ui: {
+                    estPrice: 'Болжолдуу баасы', needsPower: '{n}Вт талап кылынат', back: 'Артка', next: 'Кийинки',
+                    buildCost: 'Болжолдуу баа', manifestTitle: 'Курамдын тизмеси',
+                    powerLabel: 'Керектелген кубат / Тандалган БП', totalLabel: 'Жалпы болжолдуу баасы',
+                    contactTitle: 'Жыйноого жардам керекпи?',
+                    contactText: 'Кесипкөй жыйноо үчүн инженерибиз менен байланышыңыз:',
+                    contactSuffix: 'Telegram аркылуу', copy: 'Көчүрүү', copied: 'Көчүрүлдү!',
+                    send: 'Тизмени Telegram аркылуу жөнөтүү',
+                    transmit1: 'Маалымат шифрленүүдө...', transmit2: 'Telegram ачылууда...',
+                    watt: 'Вт', draw: 'керектөө', peak: 'чеги'
+                }
+            },
+            be: {
+                steps: [
+                    { title: 'Цэнтральны працэсар', desc: 'Абярыце ядро вылічальнай магутнасці.' },
+                    { title: 'Мацярынская плата', desc: 'Сумяшчальнасць платы абмежавана сокетам працэсара.' },
+                    { title: 'Аператыўная памяць', desc: 'Хуткасная памяць, тып залежыць ад пакалення платы.' },
+                    { title: 'Відэакарта', desc: 'Графічны працэсар для рэндэрынгу і гульняў.' },
+                    { title: 'Назапашвальнік', desc: 'Хуткія SSD-назапашвальнікі NVMe або SATA.' },
+                    { title: 'Блок сілкавання', desc: 'Магутнасць падбіраецца аўтаматычна пад вашу зборку.' },
+                    { title: 'Корпус і ахалоджванне', desc: 'Абярыце корпус, кулер працэсара і дадатковыя вентылятары.' },
+                    { title: 'Выніковая зборка', desc: 'Праверце канфігурацыю перад зваротам да нас.' }
+                ],
+                sections: { case: 'Корпус', cooler: 'Ахалоджванне', fan: 'Вентылятары' },
+                ui: {
+                    estPrice: 'Цана', needsPower: 'Патрэбна {n}Вт', back: 'Назад', next: 'Далей',
+                    buildCost: 'Кошт зборкі', manifestTitle: 'Склад зборкі',
+                    powerLabel: 'Спажыванне / Блок сілкавання', totalLabel: 'Выніковы кошт',
+                    contactTitle: 'Патрэбна дапамога са зборкай?',
+                    contactText: 'Для прафесійнай зборкі звяжыцеся з нашым інжынерам:',
+                    contactSuffix: 'у Telegram', copy: 'Капіяваць', copied: 'Скапіявана!',
+                    send: 'Адправіць зборку ў Telegram',
+                    transmit1: 'Шыфраванне дадзеных...', transmit2: 'Адкрыццё Telegram...',
+                    watt: 'Вт', draw: 'спажыванне', peak: 'пікавая'
+                }
+            },
+            kk: {
+                steps: [
+                    { title: 'Орталық процессор', desc: 'Жүйенің есептеу өзегін таңдаңыз.' },
+                    { title: 'Аналық плата', desc: 'Плата процессор сокетіне сай таңдалады.' },
+                    { title: 'Жедел жады', desc: 'Жылдам жады, түрі аналық платаға байланысты.' },
+                    { title: 'Видеокарта', desc: 'Рендеринг пен ойындарға арналған графикалық процессор.' },
+                    { title: 'Жинақтауыш', desc: 'Жылдам NVMe немесе SATA SSD дискілері.' },
+                    { title: 'Қуат блогы', desc: 'Қуаттылық таңдалған құрылғыларға байланысты автоматты есептеледі.' },
+                    { title: 'Корпус және салқындату', desc: 'Корпус, процессор салқындатқышын және қосымша желдеткіштерді таңдаңыз.' },
+                    { title: 'Қорытынды құрама', desc: 'Бізбен байланысқанға дейін конфигурацияны тексеріңіз.' }
+                ],
+                sections: { case: 'Корпус', cooler: 'Салқындату жүйесі', fan: 'Желдеткіштер' },
+                ui: {
+                    estPrice: 'Болжалды баға', needsPower: '{n}Вт қажет', back: 'Артқа', next: 'Келесі',
+                    buildCost: 'Болжалды құн', manifestTitle: 'Құраманың тізімі',
+                    powerLabel: 'Тұтыну қуаты / Қуат блогы', totalLabel: 'Жалпы болжалды баға',
+                    contactTitle: 'Жинауға көмек керек пе?',
+                    contactText: 'Кәсіби жинау үшін біздің инженермен байланысыңыз:',
+                    contactSuffix: 'Telegram арқылы', copy: 'Көшіру', copied: 'Көшірілді!',
+                    send: 'Құраманы Telegram арқылы жіберу',
+                    transmit1: 'Деректер шифрлануда...', transmit2: 'Telegram ашылуда...',
+                    watt: 'Вт', draw: 'тұтыну', peak: 'шегі'
+                }
+            },
+            uz: {
+                steps: [
+                    { title: 'Markaziy protsessor', desc: "Tizimning hisoblash yadrosini tanlang." },
+                    { title: 'Ona plata', desc: "Plata protsessor soketiga mos bo'lishi kerak." },
+                    { title: 'Operativ xotira', desc: "Tezkor xotira, turi ona platasi avlodiga bog'liq." },
+                    { title: 'Video karta', desc: "Render va o'yinlar uchun grafik protsessor." },
+                    { title: 'Saqlash qurilmasi', desc: 'Tezkor NVMe yoki SATA SSD disklari.' },
+                    { title: 'Quvvat bloki', desc: 'Quvvat tanlangan qurilmalarga qarab avtomatik hisoblanadi.' },
+                    { title: 'Korpus va sovutish', desc: "Korpus, protsessor sovutgichi va qo'shimcha shamollatgichlarni tanlang." },
+                    { title: "Yakuniy ro'yxat", desc: "Biz bilan bog'lanishdan oldin konfiguratsiyani tekshiring." }
+                ],
+                sections: { case: 'Korpus', cooler: 'Sovutish tizimi', fan: 'Shamollatgichlar' },
+                ui: {
+                    estPrice: 'Taxminiy narx', needsPower: '{n}Vt kerak', back: 'Orqaga', next: 'Keyingi',
+                    buildCost: 'Taxminiy narx', manifestTitle: "Yig'ma tarkibi",
+                    powerLabel: "Iste'mol quvvati / Tanlangan blok", totalLabel: 'Umumiy taxminiy narx',
+                    contactTitle: "Yig'ishda yordam kerakmi?",
+                    contactText: 'Professional yig\'ish uchun bizning muhandis bilan bog\'laning:',
+                    contactSuffix: 'Telegram orqali', copy: 'Nusxalash', copied: 'Nusxalandi!',
+                    send: "Tarkibni Telegram orqali yuborish",
+                    transmit1: "Ma'lumotlar shifrlanmoqda...", transmit2: 'Telegram ochilmoqda...',
+                    watt: 'Vt', draw: "iste'mol", peak: 'maksimal'
+                }
+            }
+        };
+
+        // --- APP CONFIG ---
+        const stepsConfig = [
+            { key: 'cpu', source: 'cpu' },
+            { key: 'mobo', source: 'mobo' },
+            { key: 'ram', source: 'ram' },
+            { key: 'gpu', source: 'gpu' },
+            { key: 'ssd', source: 'ssd' },
+            { key: 'psu', source: 'psu' },
+            { key: 'cooling_case', source: 'cooling_case', multi: true },
+            { key: 'checkout', source: null }
+        ];
+
+        const state = {
+            currentStepIndex: 0,
+            selections: { cpu: null, mobo: null, ram: null, gpu: null, ssd: null, psu: null, cooling_case: [] },
+            currency: 'USD',
+            theme: 'dark',
+            lang: 'en'
+        };
+
+        const rates = { USD: 1, RUB: 92, BYN: 3.25, KGS: 87, UZS: 12700, KZT: 450 };
+        const symbols = { USD: '$', RUB: '₽', BYN: 'Br', KGS: 'сом', UZS: 'сум', KZT: '₸' };
+
+        const regionalModifiers = { USD: 1.00, RUB: 1.18, BYN: 1.12, KZT: 1.10, KGS: 1.08, UZS: 1.09 };
+        const rubMemoryModifier = 1.25;
+
+        // --- PERSISTED PREFERENCES (theme + language) ---
+        function loadPreferences() {
+            try {
+                const savedTheme = localStorage.getItem('pcconfig-theme');
+                if (savedTheme === 'dark' || savedTheme === 'light') {
+                    state.theme = savedTheme;
+                } else {
+                    state.theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+                }
+            } catch (e) { state.theme = 'dark'; }
+
+            try {
+                const savedLang = localStorage.getItem('pcconfig-lang');
+                if (savedLang && i18n[savedLang]) state.lang = savedLang;
+            } catch (e) { state.lang = 'en'; }
+        }
+
+        function applyTheme() {
+            const html = document.documentElement;
+            // Remove both, add current
+            html.classList.remove('dark', 'light');
+            html.classList.add(state.theme);
+            try { localStorage.setItem('pcconfig-theme', state.theme); } catch (e) {}
+        }
+
+        // --- CORE PRICING LOGIC (unchanged) ---
+        function calculateFinalPrice(basePriceUSD, category) {
+            const isMemory = (category === 'ram' || category === 'ssd');
+            const baseMargin = isMemory ? 1.25 : 1.15;
+            let regMargin = regionalModifiers[state.currency];
+            if (state.currency === 'RUB' && isMemory) regMargin = rubMemoryModifier;
+            const finalUSD = basePriceUSD * baseMargin * regMargin;
+            const finalLocal = finalUSD * rates[state.currency];
+            return Math.ceil(finalLocal);
+        }
+
+        function formatCurrency(amount) {
+            const num = amount.toLocaleString('en-US');
+            const sym = symbols[state.currency];
+            if (['USD'].includes(state.currency)) return `${sym}${num}`;
+            return `${num} ${sym}`;
+        }
+
+        function triggerPriceAnimation() {
+            document.querySelectorAll('.dynamic-price').forEach(el => {
+                el.classList.remove('price-update');
+                void el.offsetWidth;
+                el.classList.add('price-update');
+            });
+        }
+
+        function calculateRawDraw() {
+            if (!state.selections.cpu || !state.selections.gpu) return 0;
+            return state.selections.cpu.tdp + state.selections.gpu.tdp + 60;
+        }
+        function calculateRequiredPower() {
+            const raw = calculateRawDraw();
+            return raw > 0 ? Math.ceil(raw * 1.30) : 0;
+        }
+
+        function calculateTotal() {
+            let total = 0;
+            for (const [key, item] of Object.entries(state.selections)) {
+                if (!item) continue;
+                if (Array.isArray(item)) {
+                    item.forEach(subItem => total += calculateFinalPrice(subItem.price, key));
+                } else {
+                    total += calculateFinalPrice(item.price, key);
+                }
+            }
+            return total;
+        }
+
+        // --- RENDER PIPELINE ---
+        function t() { return i18n[state.lang]; }
+
+        function initApp() {
+            loadPreferences();
+            document.getElementById('languageSelector').value = state.lang;
+            document.getElementById('currencySelector').value = state.currency;
+            applyTheme();
+
+            setupEventListeners();
+            renderIndicators();
+            applyStaticTranslations();
+            renderCurrentStep();
+            updateFooter();
+        }
+
+        function setupEventListeners() {
+            document.getElementById('currencySelector').addEventListener('change', (e) => {
+                state.currency = e.target.value;
+                renderCurrentStep();
+                updateFooter();
+                triggerPriceAnimation();
+            });
+
+            document.getElementById('languageSelector').addEventListener('change', (e) => {
+                state.lang = e.target.value;
+                try { localStorage.setItem('pcconfig-lang', state.lang); } catch (err) {}
+                applyStaticTranslations();
+                renderCurrentStep();
+                updateFooter();
+            });
+
+            document.getElementById('themeToggle').addEventListener('click', () => {
+                state.theme = state.theme === 'dark' ? 'light' : 'dark';
+                applyTheme();
+            });
+
+            document.getElementById('btnNext').addEventListener('click', () => {
+                if (state.currentStepIndex < stepsConfig.length - 1) {
+                    state.currentStepIndex++;
+                    renderIndicators();
+                    renderCurrentStep();
+                }
+            });
+
+            document.getElementById('btnPrev').addEventListener('click', () => {
+                if (state.currentStepIndex > 0) {
+                    state.currentStepIndex--;
+                    renderIndicators();
+                    renderCurrentStep();
+                }
+            });
+
+            document.getElementById('copyHandleBtn').addEventListener('click', copyHandle);
+            document.getElementById('sendTelegramBtn').addEventListener('click', handleSendTelegram);
+        }
+
+        function applyStaticTranslations() {
+            const d = t();
+            document.getElementById('buildCostLabel').innerText = d.ui.buildCost;
+            document.getElementById('btnPrev').innerText = d.ui.back;
+            document.getElementById('btnNext').innerText = d.ui.next;
+            document.getElementById('manifestTitle').innerText = d.ui.manifestTitle;
+            document.getElementById('powerLabel').innerText = d.ui.powerLabel;
+            document.getElementById('totalLabel').innerText = d.ui.totalLabel;
+            document.getElementById('contactTitle').innerText = d.ui.contactTitle;
+            document.getElementById('contactText').innerText = d.ui.contactText;
+            document.getElementById('contactSuffix').innerText = d.ui.contactSuffix;
+            document.getElementById('copyHandleBtn').innerText = d.ui.copy;
+            document.getElementById('sendTelegramBtn').innerText = d.ui.send;
+        }
+
+        function renderIndicators() {
+            const container = document.getElementById('stepIndicators');
+            container.innerHTML = '';
+            const progress = (state.currentStepIndex / (stepsConfig.length - 1)) * 100;
+            document.getElementById('progressLine').style.width = `${progress}%`;
+
+            stepsConfig.forEach((step, idx) => {
+                const dot = document.createElement('div');
+                const isPast = idx <= state.currentStepIndex;
+                const isActive = idx === state.currentStepIndex;
+
+                dot.className = `w-4 h-4 rounded-full border-2 flex items-center justify-center transition-all duration-500 z-10 ${
+                    isActive ? 'border-[var(--accent)] bg-[var(--bg-secondary)] shadow-[0_0_10px_var(--accent-glow)] scale-150' :
+                    isPast ? 'border-purple-600 bg-purple-600' : 'border-[var(--border-color)] bg-[var(--bg-secondary)]'
+                }`;
+                container.appendChild(dot);
+            });
+        }
+
+        function renderCurrentStep() {
+            const step = stepsConfig[state.currentStepIndex];
+            const meta = t().steps[state.currentStepIndex];
+            document.getElementById('stepTitle').innerText = `[0${state.currentStepIndex + 1}] ${meta.title}`;
+            document.getElementById('stepDescription').innerText = meta.desc;
+
+            const grid = document.getElementById('hardwareGrid');
+            const checkout = document.getElementById('checkoutSection');
+
+            if (step.key === 'checkout') {
+                grid.classList.add('hidden');
+                checkout.classList.remove('hidden');
+                renderCheckout();
+                updateNavButtons();
+                return;
+            }
+
+            grid.classList.remove('hidden');
+            checkout.classList.add('hidden');
+            grid.innerHTML = '';
+
+            let items = db[step.source];
+
+            if (step.key === 'mobo' && state.selections.cpu) {
+                items = items.filter(i => i.socket === state.selections.cpu.socket);
+            }
+            if (step.key === 'ram' && state.selections.mobo) {
+                items = items.filter(i => i.ram === state.selections.mobo.ram);
+            }
+
+            const requiredPower = calculateRequiredPower();
+
+            if (step.multi) {
+                const types = ['case', 'cooler', 'fan'];
+                types.forEach(typ => {
+                    const sectionTitle = document.createElement('h3');
+                    sectionTitle.className = "col-span-full text-2xl font-orbitron font-bold mt-4 mb-2 text-[var(--text-secondary)] border-b border-[var(--border-color)] pb-2 uppercase";
+                    sectionTitle.innerText = t().sections[typ];
+                    grid.appendChild(sectionTitle);
+
+                    items.filter(i => i.type === typ).forEach(item => {
+                        grid.appendChild(createCard(item, step, requiredPower));
+                    });
+                });
+            } else {
+                items.forEach(item => {
+                    grid.appendChild(createCard(item, step, requiredPower));
+                });
+            }
+
+            updateNavButtons();
+        }
+
+        function createCard(item, step, requiredPower) {
+            const div = document.createElement('div');
+            const d = t();
+
+            const isSelected = step.multi
+                ? state.selections[step.key].some(i => i.id === item.id)
+                : state.selections[step.key]?.id === item.id;
+
+            div.className = `hardware-card p-6 rounded-sm flex flex-col justify-between ${isSelected ? 'selected' : ''}`;
+
+            const finalPrice = calculateFinalPrice(item.price, step.key);
+            let lockedHtml = '';
+            let isLocked = false;
+
+            if (step.key === 'psu' && item.capacity < requiredPower) {
+                isLocked = true;
+                div.classList.add('opacity-40', 'pointer-events-none', 'grayscale');
+                const lockMsg = d.ui.needsPower.replace('{n}', requiredPower);
+                lockedHtml = `<div class="absolute top-4 right-4 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-sm flex items-center gap-1 shadow-[0_0_10px_rgba(220,38,38,0.6)]">
+                    <span>🔒 ${lockMsg}</span>
+                </div>`;
+            }
+
+            let specsHtml = '';
+            if (item.socket) specsHtml += `<span class="bg-[var(--bg-primary)] text-xs px-2 py-1 rounded-sm">${item.socket}</span>`;
+            if (item.ram) specsHtml += `<span class="bg-[var(--bg-primary)] text-xs px-2 py-1 rounded-sm">${item.ram}</span>`;
+            if (item.tdp) specsHtml += `<span class="bg-[var(--bg-primary)] text-xs px-2 py-1 rounded-sm text-amber-500">${item.tdp}${d.ui.watt} ${d.ui.draw}</span>`;
+            if (item.capacity) specsHtml += `<span class="bg-[var(--bg-primary)] text-xs px-2 py-1 rounded-sm text-green-500">${item.capacity}${d.ui.watt} ${d.ui.peak}</span>`;
+
+            div.innerHTML = `
+                ${lockedHtml}
+                <div>
+                    <h3 class="font-bold text-lg mb-2 text-[var(--text-primary)] pr-16">${item.name}</h3>
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        ${specsHtml}
+                    </div>
+                </div>
+                <div class="mt-4 pt-4 border-t border-[var(--border-color)] flex justify-between items-end">
+                    <div class="text-xs text-[var(--text-muted)] font-bold uppercase tracking-wider">${d.ui.estPrice}</div>
+                    <div class="dynamic-price font-orbitron text-xl font-bold text-[var(--accent)]">${formatCurrency(finalPrice)}</div>
+                </div>
+            `;
+
+            if (!isLocked) {
+                div.addEventListener('click', () => {
+                    if (step.multi) {
+                        const idx = state.selections[step.key].findIndex(i => i.id === item.id);
+                        if (idx > -1) state.selections[step.key].splice(idx, 1);
+                        else state.selections[step.key].push(item);
+                    } else {
+                        if (state.selections[step.key]?.id === item.id) {
+                            state.selections[step.key] = null;
+                        } else {
+                            state.selections[step.key] = item;
+                        }
+                        if (step.key === 'cpu') { state.selections.mobo = null; state.selections.ram = null; state.selections.psu = null; }
+                        if (step.key === 'mobo') { state.selections.ram = null; }
+                        if (step.key === 'gpu') { state.selections.psu = null; }
+                    }
+                    renderCurrentStep();
+                    updateFooter();
+                });
+            }
+
+            return div;
+        }
+
+        function renderCheckout() {
+            const d = t();
+            const list = document.getElementById('invoiceList');
+            list.innerHTML = '';
+
+            const requiredPower = calculateRequiredPower();
+            const rawDraw = calculateRawDraw();
+            const actualCapacity = state.selections.psu ? state.selections.psu.capacity : 0;
+
+            document.getElementById('powerSummary').innerText = `${rawDraw}${d.ui.watt} / ${actualCapacity}${d.ui.watt}`;
+            const powerEl = document.getElementById('powerSummary');
+            if (rawDraw > 0 && actualCapacity < requiredPower) {
+                powerEl.classList.remove('text-[var(--accent)]');
+                powerEl.classList.add('text-red-500');
+            } else {
+                powerEl.classList.remove('text-red-500');
+                powerEl.classList.add('text-[var(--accent)]');
+            }
+
+            stepsConfig.slice(0, 7).forEach((step, idx) => {
+                const selection = state.selections[step.key];
+                if (!selection || (Array.isArray(selection) && selection.length === 0)) return;
+                const stepLabel = d.steps[idx].title;
+
+                const renderInvoiceRow = (item, cat) => {
+                    const price = calculateFinalPrice(item.price, cat);
+                    return `
+                        <div class="flex justify-between items-center bg-[var(--bg-primary)] p-4 rounded-sm border border-[var(--border-color)]">
+                            <div>
+                                <div class="text-xs text-[var(--text-muted)] font-bold uppercase tracking-wider mb-1">${stepLabel}</div>
+                                <div class="font-bold text-[var(--text-primary)] text-lg">${item.name}</div>
+                            </div>
+                            <div class="font-orbitron text-xl font-bold text-[var(--accent)] dynamic-price">${formatCurrency(price)}</div>
+                        </div>
+                    `;
+                };
+
+                if (Array.isArray(selection)) {
+                    selection.forEach(i => list.innerHTML += renderInvoiceRow(i, step.key));
+                } else {
+                    list.innerHTML += renderInvoiceRow(selection, step.key);
+                }
+            });
+
+            document.getElementById('checkoutTotal').innerText = formatCurrency(calculateTotal());
+        }
+
+        function updateFooter() {
+            document.getElementById('footerTotal').innerText = formatCurrency(calculateTotal());
+            triggerPriceAnimation();
+        }
+
+        function updateNavButtons() {
+            const btnNext = document.getElementById('btnNext');
+            const btnPrev = document.getElementById('btnPrev');
+            const step = stepsConfig[state.currentStepIndex];
+
+            let canProceed = true;
+            if (!step.multi && step.key !== 'checkout') {
+                canProceed = state.selections[step.key] !== null;
+            }
+
+            btnNext.disabled = !canProceed;
+            btnPrev.disabled = state.currentStepIndex === 0;
+
+            if (state.currentStepIndex === stepsConfig.length - 1) {
+                btnNext.classList.add('hidden');
+            } else {
+                btnNext.classList.remove('hidden');
+            }
+        }
+
+        function copyHandle() {
+            const d = t();
+            const btn = document.getElementById('copyHandleBtn');
+            const text = '@minecaine';
+
+            const flashCopied = () => {
+                const original = d.ui.copy;
+                btn.innerText = d.ui.copied;
+                btn.classList.add('copy-flash');
+                setTimeout(() => {
+                    btn.innerText = original;
+                    btn.classList.remove('copy-flash');
+                }, 1800);
+            };
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(flashCopied).catch(() => fallbackCopy(text, flashCopied));
+            } else {
+                fallbackCopy(text, flashCopied);
+            }
+        }
+
+        function fallbackCopy(text, onDone) {
+            const ta = document.createElement('textarea');
+            ta.value = text;
+            ta.style.position = 'fixed';
+            ta.style.opacity = '0';
+            document.body.appendChild(ta);
+            ta.select();
+            try { document.execCommand('copy'); } catch (e) {}
+            document.body.removeChild(ta);
+            onDone();
+        }
+
+        function buildManifestText() {
+            const d = t();
+            let lines = [`PC Configurator — ${d.ui.manifestTitle}`];
+            stepsConfig.slice(0, 7).forEach((step, idx) => {
+                const selection = state.selections[step.key];
+                if (!selection || (Array.isArray(selection) && selection.length === 0)) return;
+                const label = d.steps[idx].title;
+                if (Array.isArray(selection)) {
+                    selection.forEach(i => lines.push(`${label}: ${i.name}`));
+                } else {
+                    lines.push(`${label}: ${selection.name}`);
+                }
+            });
+            lines.push(`${d.ui.totalLabel}: ${formatCurrency(calculateTotal())}`);
+            return lines.join('\n');
+        }
+
+        function handleSendTelegram() {
+            const d = t();
+            const overlay = document.getElementById('loadingOverlay');
+            const logBox = document.getElementById('matrixLogs');
+            const loadingText = document.getElementById('loadingText');
+            const spinner = document.getElementById('loadingSpinner');
+
+            spinner.classList.remove('hidden');
+            loadingText.classList.add('text-transparent');
+            loadingText.classList.remove('text-green-400');
+            loadingText.innerText = d.ui.transmit1;
+            logBox.innerHTML = '';
+            overlay.classList.add('active');
+
+            const manifestText = buildManifestText();
+            const url = `https://t.me/minecaine?text=${encodeURIComponent(manifestText)}`;
+
+            setTimeout(() => {
+                loadingText.innerText = d.ui.transmit2;
+            }, 700);
+
+            setTimeout(() => {
+                window.open(url, '_blank', 'noopener');
+                overlay.classList.remove('active');
+            }, 1400);
+        }
+
+        initApp();
+    </script>
+</body>
+</html>
